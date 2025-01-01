@@ -6,7 +6,7 @@ using UnityEngine;
 public class PopQuiz : MonoBehaviour, IItem
 {
     public static event Action<int> OnQuizCollect;
-    public int worth = 5;
+    public int worth;
 
     public void Collect()
     {
