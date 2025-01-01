@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     public Rigidbody2D rb;
+    public Animator animator;
     bool isFacingRight = true;
     public ParticleSystem smokeFX;
 
@@ -66,6 +67,10 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = new Vector2(horizontalMovement * moveSpeed, rb.velocity.y);
             Flip();
         }
+
+        animator.SetFloat("yVelocity", rb.velocity.y);
+        animator.SetFloat("magnitude", rb.velocity.magnitude);
+        animator.SetBool("isWallSliding", isWallSliding);
     }
 
     private void Gravity()
@@ -96,6 +101,11 @@ public class PlayerMovement : MonoBehaviour
             transform.localScale = ls;
         }
 
+        if(rb.velocity.y == 0)
+        {
+            smokeFX.Play();
+        }
+
         //// Flip the character based on movement direction
         //if (horizontalMovement > 0)
         //{
@@ -115,11 +125,15 @@ public class PlayerMovement : MonoBehaviour
             {   
                 rb.velocity = new Vector2(rb.velocity.x, jumpPower); //Full jump
                 jumpsRemaining--;
+                animator.SetTrigger("jump");
+                smokeFX.Play();
             }
             else if(context.canceled)
             {
                 rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f); //Light jump
                 jumpsRemaining--;
+                animator.SetTrigger("jump");
+                smokeFX.Play();
             }
         }
 
@@ -129,8 +143,10 @@ public class PlayerMovement : MonoBehaviour
             isWallJumping = true;
             rb.velocity = new Vector2(wallJumpDirection * wallJumpPower.x, wallJumpPower.y); //Jump away from wall
             wallJumpTimer = 0;
+            animator.SetTrigger("jump");
+            smokeFX.Play();
 
-            if(transform.localScale.x != wallJumpDirection )
+            if (transform.localScale.x != wallJumpDirection )
             {
                 isFacingRight = !isFacingRight;
                 Vector3 ls = transform.localScale;
