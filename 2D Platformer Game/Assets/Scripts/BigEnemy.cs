@@ -9,9 +9,9 @@ public class BigEnemy : MonoBehaviour
     public float jumpForce = 2f;
     public LayerMask groundLayer;
 
-    private Rigidbody2D rb;
-    private bool isGrounded;
-    private bool shouldJump;
+    public Rigidbody2D rb;
+    public bool isGrounded;
+    public bool shouldJump;
 
     // Start is called before the first frame update
     void Start()
@@ -23,13 +23,20 @@ public class BigEnemy : MonoBehaviour
     void Update()
     {
         // Is Grounded?
-        isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 1f, groundLayer);
+        isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 2f, groundLayer);
 
         // Player Direction
         float direction = Mathf.Sign(player.position.x - transform.position.x);
 
+        // Flip the character based on direction
+        FlipCharacter(direction);
+
         // Player above detection
         bool isPlayerAbove = Physics2D.Raycast(transform.position, Vector2.up, 5f, 1 << player.gameObject.layer);
+
+
+        Debug.DrawRay(transform.position, Vector2.down * 2f, Color.red);
+
 
         if (isGrounded)
         {
@@ -39,14 +46,18 @@ public class BigEnemy : MonoBehaviour
             // Jump if there's a gap ahead & no ground in front
             // Else if there's player above and platform above
 
-            // 1. Ground
+            // If Ground
             RaycastHit2D groundInFront = Physics2D.Raycast(transform.position, new Vector2(direction, 0), 2f, groundLayer);
 
             // 2. Gap
-            RaycastHit2D gapAhead = Physics2D.Raycast(transform.position + new Vector3(direction, 0, 0), Vector2.down, 2f, groundLayer);
+            RaycastHit2D gapAhead = Physics2D.Raycast(transform.position + new Vector3(direction, 0, 0), Vector2.down, 5f, groundLayer);
 
             // 3. Platform above
             RaycastHit2D platformAbove = Physics2D.Raycast(transform.position, Vector2.up, 5f, groundLayer);
+
+            Debug.DrawRay(transform.position, Vector2.up * 5f, Color.yellow);
+            Debug.DrawRay(transform.position, new Vector2(direction, 0) * 2f, Color.blue);
+            Debug.DrawRay(transform.position + new Vector3(direction, 0, 0), Vector2.down * 5f, Color.green);
 
             if (!groundInFront.collider && !gapAhead.collider)
             {
@@ -71,6 +82,19 @@ public class BigEnemy : MonoBehaviour
             rb.AddForce(new Vector2(jumpDirection.x, jumpForce), ForceMode2D.Impulse);
         }
     }
+
+    void FlipCharacter(float direction)
+    {
+        // Check if the current scale is consistent with the direction
+        if ((direction > 0 && transform.localScale.x < 0) || (direction < 0 && transform.localScale.x > 0))
+        {
+            // Flip the character by inverting the X scale
+            Vector3 scale = transform.localScale;
+            scale.x *= -1; // Invert the X axis
+            transform.localScale = scale;
+        }
+    }
+
 
 
 }
